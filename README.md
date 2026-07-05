@@ -2,6 +2,8 @@
 
 Terraform configuration for a local development environment using Incus (LXC).
 
+See `AGENTS.md` for agent/AI tooling notes (container access, prompt detection, etc.).
+
 ## Files
 
 - `node-dev.tf` - Defines the `node-dev` Incus instance.
