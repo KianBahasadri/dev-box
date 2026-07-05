@@ -24,7 +24,13 @@ See `README.md` for a brief human-oriented overview.
 
 Host paths are bind-mounted into the container with UID/GID shifting (`shift = "true"`) so the `dev` user can read and write them.
 
-ID shifting maps container UIDs to the host. For this to work, host files under the mounted path should be owned by the same numeric UID the container uses for `dev` (typically **1000**; see [Default user](#default-user)). If permissions look wrong inside the container, check ownership on the host with `ls -ln <host-path>`.
+ID shifting maps container UIDs to the host. For this to work, `dev` inside the container and the host user that owns the source directory must share the same numeric UID (**1000** in the standard setup). If you see `EACCES` on write inside a mount, check both sides:
+
+```bash
+id -u kian                              # host
+incus exec node-dev -- su -l dev -c id  # container
+ls -ln /home/kian/<project>             # host ownership
+```
 
 Host paths in `node-dev.tf` are machine-specific — edit them (and the table below) to match your own home directory.
 
@@ -53,15 +59,22 @@ terraform apply
 
 ### Default user
 
-The working user inside the container is **`dev`**. The expected UID/GID is **1000**; on the current instance it happens to be **1001** (likely because UID 1000 was already taken when the user was created).
+The working user inside the container is **`dev`** with UID/GID **1000**. This must match the numeric UID of the host user that owns bind-mounted project directories (e.g. `kian` at 1000 on the host), or shifted mounts will be read-only for `dev`.
 
-Verify the actual UID before assuming permissions or mount ownership:
+`terraform apply` does not create this user. After provisioning, create `dev` at UID 1000 before adding bind mounts you intend to write to:
+
+```bash
+incus exec node-dev -- useradd -m -u 1000 -g 1000 dev
+```
+
+Do not create another user at UID 1000 first — if that slot is taken, `dev` will land on 1001 and bind-mounted host files owned by 1000 become unwritable (`EACCES`).
+
+Verify:
 
 ```bash
 incus exec node-dev -- su -l dev -c id
+# uid=1000(dev) gid=1000(dev)
 ```
-
-If `dev` does not exist yet, create it (matching the UID you intend to use for shifted mounts) before relying on `incus exec node-dev -- su -l dev`.
 
 ### Entering the dev box
 
