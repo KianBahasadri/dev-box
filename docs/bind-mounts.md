@@ -1,14 +1,15 @@
 # Bind mounts
 
-`node-dev.tf` declares `disk` devices that bind-mount host project directories
-into the container. `shift = "true"` enables Incus UID/GID shifting so the
-container's `dev` user can read and write them.
+`node-dev.tf` declares `disk` devices that bind-mount host directories into the
+container. `shift = "true"` enables Incus UID/GID shifting so the container's
+`dev` user can access them. Individual mounts may be read-only.
 
 ## Current mounts
 
-| Host path | Container path |
-|-----------|----------------|
-| `/home/kian/condition-assesment-report-generator` | `/home/dev/condition-assesment-report-generator` |
+| Host path | Container path | Access |
+|-----------|----------------|--------|
+| `/home/kian/condition-assesment-report-generator` | `/home/dev/condition-assesment-report-generator` | Read/write |
+| `/home/kian/clusterfork` | `/home/dev/clusterfork` | Read-only |
 
 Host paths are machine-specific — edit them (and this table) to match your own
 home directory. Add more `device` blocks in `node-dev.tf` to mount additional
