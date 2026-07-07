@@ -40,6 +40,22 @@ Host paths in `node-dev.tf` are machine-specific — edit them (and the table be
 
 Add more `device` blocks in `node-dev.tf` to mount additional project directories.
 
+### Wayland socket proxy
+
+`node-dev.tf` also defines a `proxy` device (`wayland-proxy`) that forwards only the host's Wayland socket (`/run/user/1000/wayland-0`) to `/mnt/wayland-0` inside the container, so GUI apps run against the host compositor.
+
+This is deliberately **not** a mount of `/run/user/1000` — the full runtime dir would also expose the host session's D-Bus, ssh-agent, gpg-agent, and PipeWire sockets to the container. The proxy also survives compositor restarts and does not block container startup when no host session exists (e.g. autostart after reboot, before login).
+
+`dev`'s `~/.bashrc` (not versioned here) exports `WAYLAND_DISPLAY=/mnt/wayland-0` — an absolute path, so clients don't need a shared `XDG_RUNTIME_DIR` — plus `XDG_SESSION_TYPE=wayland`, and falls back to `XDG_RUNTIME_DIR=/tmp/runtime-dev` when logind hasn't provided one. No `gpu` device is passed through, so apps use software rendering (`wl_shm`).
+
+`XDG_SESSION_TYPE=wayland` is what makes Electron pick Wayland: recent Electron (v43+) ignores `ELECTRON_OZONE_PLATFORM_HINT` and `app.commandLine.appendSwitch("ozone-platform-hint", ...)` — the ozone platform is chosen from the session type (or an explicit `--ozone-platform=wayland` CLI flag) before the app's main script runs. Without it, Electron tries X11 and dies with `Missing X server or $DISPLAY`.
+
+Quick test from inside the container:
+
+```bash
+incus exec node-dev -- su -l dev -c 'WAYLAND_DISPLAY=/mnt/wayland-0 wayland-info'
+```
+
 ## Requirements
 
 - Terraform >= 1.5
