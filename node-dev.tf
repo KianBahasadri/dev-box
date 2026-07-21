@@ -51,7 +51,7 @@ resource "incus_instance" "node_dev" {
     }
   }
 
-  # Host localhost:8000 → container :8000 (e.g. dev servers, game backends).
+  # Host localhost:8000/8001 → container :8000/:8001 (e.g. dev servers, game backends).
   device {
     name = "port-8000"
     type = "proxy"
@@ -59,6 +59,16 @@ resource "incus_instance" "node_dev" {
     properties = {
       listen  = "tcp:127.0.0.1:8000"
       connect = "tcp:127.0.0.1:8000"
+    }
+  }
+
+  device {
+    name = "port-8001"
+    type = "proxy"
+
+    properties = {
+      listen  = "tcp:127.0.0.1:8001"
+      connect = "tcp:127.0.0.1:8001"
     }
   }
 
