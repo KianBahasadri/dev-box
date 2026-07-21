@@ -40,6 +40,17 @@ resource "incus_instance" "node_dev" {
     }
   }
 
+  device {
+    name = "game"
+    type = "disk"
+
+    properties = {
+      source = "/home/kian/game"
+      path   = "/home/dev/game"
+      shift  = "true"
+    }
+  }
+
   # Forwards only the host Wayland socket into the container. A proxy device
   # (rather than a disk mount of /run/user/1000) keeps the host session's
   # D-Bus, ssh-agent, gpg-agent, and PipeWire sockets out of the container,
