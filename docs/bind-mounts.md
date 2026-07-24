@@ -10,11 +10,30 @@ container. `shift = "true"` enables Incus UID/GID shifting so the container's
 |-----------|----------------|--------|
 | `/home/kian/condition-assesment-report-generator` | `/home/dev/condition-assesment-report-generator` | Read/write |
 | `/home/kian/clusterfork` | `/home/dev/clusterfork` | Read-only |
+| `/home/kian/.local/share/clusterfork-auth` | `/home/dev/.local/share/clusterfork-auth` | Read-only |
 | `/home/kian/game` | `/home/dev/game` | Read/write |
 
 Host paths are machine-specific — edit them (and this table) to match your own
 home directory. Add more `device` blocks in `node-dev.tf` to mount additional
 project directories.
+
+The Clusterfork auth-store mount lets the container follow host-side Codex and
+Cursor account changes without remounting individual `auth.json` files. The
+container's agent auth paths are symlinks into this store. Because the mount is
+read-only, rotate accounts and refresh tokens on the host.
+
+After creating the container's `dev` user, create those links once:
+
+```bash
+incus exec node-dev -- su -l dev -c '
+  mkdir -p ~/.codex ~/.config/cursor
+  ln -s ../.local/share/clusterfork-auth/codex/current ~/.codex/auth.json
+  ln -s ../../.local/share/clusterfork-auth/cursor/current ~/.config/cursor/auth.json
+'
+```
+
+The commands intentionally stop if an auth path already exists so they cannot
+overwrite container-local credentials.
 
 ## The UID-1000 requirement
 

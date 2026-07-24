@@ -41,6 +41,18 @@ resource "incus_instance" "node_dev" {
   }
 
   device {
+    name = "clusterfork-auth"
+    type = "disk"
+
+    properties = {
+      source   = "/home/kian/.local/share/clusterfork-auth"
+      path     = "/home/dev/.local/share/clusterfork-auth"
+      readonly = "true"
+      shift    = "true"
+    }
+  }
+
+  device {
     name = "game"
     type = "disk"
 
