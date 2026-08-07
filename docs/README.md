@@ -1,6 +1,6 @@
 # dev-box docs
 
-- [instance.md](instance.md) — The `node-dev` Incus container resource: name, image, profile, running state.
+- [instance.md](instance.md) — The `node-dev` Incus container resource: name, image, profile, running state, and the missing timezone the image ships with.
 - [bind-mounts.md](bind-mounts.md) — Host-to-container disk mounts with UID/GID shifting, the UID-1000 requirement, and keeping absolute-path build artifacts (Python venvs) from colliding across the mount.
 - [wayland-proxy.md](wayland-proxy.md) — The proxy device forwarding the host Wayland socket, and why it isn't a runtime-dir mount.
 - [container-access.md](container-access.md) — Entering the container, the `dev` user, and recognizing pasted terminal output from host vs. dev box.

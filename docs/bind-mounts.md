@@ -79,20 +79,47 @@ last wins.
 
 Give each side its own environment directory. `UV_PROJECT_ENVIRONMENT` accepts a
 relative path, which `uv` resolves against each project root — so a single
-value covers every mounted project, and none of them collide with the host:
+value covers every mounted project, and none of them collide with the host.
+
+Export it near the top of `~/.bashrc`, **above** the interactivity guard:
 
 ```bash
-incus exec node-dev -- su -l dev -c \
-  'echo "export UV_PROJECT_ENVIRONMENT=.venv-box" >> ~/.bash_profile'
+#
+# ~/.bashrc
+#
+
+export UV_PROJECT_ENVIRONMENT=.venv-box
+
+# If not running interactively, don't do anything
+[[ $- != *i* ]] && return
 ```
 
-It goes in `~/.bash_profile`, **not** `~/.bashrc`. The container's `.bashrc`
-opens with `[[ $- != *i* ]] && return`, so anything added there is skipped by
-non-interactive shells — including `incus exec node-dev -- su -l dev -c '...'`,
-which is how scripts and agents run commands in here. That would leave exactly
-the automated callers rebuilding `.venv` and breaking the host again.
+The placement is the whole trick, because bash reads different files depending
+on how the shell started, and this variable has to survive all of them:
+
+| Shell | Reads | Example |
+|-------|-------|---------|
+| Interactive, non-login | `.bashrc` only | `incus exec node-dev -- bash`, a session already open |
+| Login (interactive or not) | `.bash_profile`, which sources `.bashrc` | `incus exec node-dev -- su -l dev`, `su -l dev -c '...'` |
+
+`.bash_profile` alone misses every non-login shell. `.bashrc` *below* the guard
+misses every non-interactive one — including `su -l dev -c '...'`, which is how
+scripts and agents run commands in here. Above the guard in `.bashrc` is the one
+spot that covers both: the guard's `return` only ends the sourcing, so lines
+before it have already run.
 
 Add `.venv-box/` to each project's `.gitignore`.
+
+An already-open shell keeps the environment it started with, so re-login before
+trusting it:
+
+```bash
+incus exec node-dev -- su -l dev -c 'echo $UV_PROJECT_ENVIRONMENT'  # .venv-box
+```
+
+If a `.venv` does get built on the wrong side, no amount of environment fixing
+repairs it — the absolute paths are already written. Delete that `.venv` and let
+the losing side rebuild its own.
 
 Like the `dev` user and the auth symlinks above, this is container-local state
 that `terraform apply` does not create. Re-apply it after rebuilding the
