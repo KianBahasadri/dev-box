@@ -54,3 +54,46 @@ Do not create another user at UID 1000 before `dev` — if that slot is taken,
 `dev` will land on 1001 and bind-mounted host files owned by 1000 become
 unwritable. See [container-access.md](container-access.md) for creating the
 `dev` user.
+
+## Tools that bake absolute paths into a project
+
+A mounted project is one directory with two identities: `/home/kian/<project>`
+owned by `kian` on the host, `/home/dev/<project>` owned by `dev` in here. Any
+tool that writes an absolute path *into* the project produces a file that only
+works on the side that wrote it.
+
+Python virtualenvs are the case that bites. `uv` records the interpreter path in
+`.venv/pyvenv.cfg` and in every `.venv/bin/` shebang, so a venv built inside the
+container leaves the host with a `.venv` pointing at `/home/dev/.local/share/uv/
+python/...` — a directory the host user cannot even read, because `/home/dev` is
+mode `700` and owned by someone else. The host then fails on any `uv` command
+with:
+
+```text
+error: Failed to query Python interpreter
+  Caused by: failed to canonicalize path `.../.venv/bin/python3`: Permission denied
+```
+
+Building on the host breaks the container the same way. Whichever side ran `uv`
+last wins.
+
+Give each side its own environment directory. `UV_PROJECT_ENVIRONMENT` accepts a
+relative path, which `uv` resolves against each project root — so a single
+value covers every mounted project, and none of them collide with the host:
+
+```bash
+incus exec node-dev -- su -l dev -c \
+  'echo "export UV_PROJECT_ENVIRONMENT=.venv-box" >> ~/.bash_profile'
+```
+
+It goes in `~/.bash_profile`, **not** `~/.bashrc`. The container's `.bashrc`
+opens with `[[ $- != *i* ]] && return`, so anything added there is skipped by
+non-interactive shells — including `incus exec node-dev -- su -l dev -c '...'`,
+which is how scripts and agents run commands in here. That would leave exactly
+the automated callers rebuilding `.venv` and breaking the host again.
+
+Add `.venv-box/` to each project's `.gitignore`.
+
+Like the `dev` user and the auth symlinks above, this is container-local state
+that `terraform apply` does not create. Re-apply it after rebuilding the
+instance.
