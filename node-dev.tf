@@ -63,6 +63,17 @@ resource "incus_instance" "node_dev" {
     }
   }
 
+  device {
+    name = "hangout-automator"
+    type = "disk"
+
+    properties = {
+      source = "/home/kian/hangout-automator"
+      path   = "/home/dev/hangout-automator"
+      shift  = "true"
+    }
+  }
+
   # Host localhost:8000/8001 → container :8000/:8001 (e.g. dev servers, game backends).
   device {
     name = "port-8000"

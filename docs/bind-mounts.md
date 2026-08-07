@@ -12,6 +12,7 @@ container. `shift = "true"` enables Incus UID/GID shifting so the container's
 | `/home/kian/clusterfork` | `/home/dev/clusterfork` | Read-only |
 | `/home/kian/.local/share/clusterfork-auth` | `/home/dev/.local/share/clusterfork-auth` | Read-only |
 | `/home/kian/game` | `/home/dev/game` | Read/write |
+| `/home/kian/hangout-automator` | `/home/dev/hangout-automator` | Read/write |
 
 Host paths are machine-specific — edit them (and this table) to match your own
 home directory. Add more `device` blocks in `node-dev.tf` to mount additional
