@@ -21,3 +21,6 @@ override.tf.json
 
 # Command Code
 .commandcode/
+
+# Python
+__pycache__/
