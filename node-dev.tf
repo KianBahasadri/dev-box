@@ -53,6 +53,17 @@ resource "incus_instance" "node_dev" {
   }
 
   device {
+    name = "downloads-dev"
+    type = "disk"
+
+    properties = {
+      source = "/home/kian/Downloads/dev"
+      path   = "/home/dev/Downloads/dev"
+      shift  = "true"
+    }
+  }
+
+  device {
     name = "game"
     type = "disk"
 

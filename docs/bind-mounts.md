@@ -11,6 +11,7 @@ container. `shift = "true"` enables Incus UID/GID shifting so the container's
 | `/home/kian/condition-assesment-report-generator` | `/home/dev/condition-assesment-report-generator` | Read/write |
 | `/home/kian/clusterfork` | `/home/dev/clusterfork` | Read-only |
 | `/home/kian/.local/share/clusterfork-auth` | `/home/dev/.local/share/clusterfork-auth` | Read-only |
+| `/home/kian/Downloads/dev` | `/home/dev/Downloads/dev` | Read/write |
 | `/home/kian/game` | `/home/dev/game` | Read/write |
 | `/home/kian/hangout-automator` | `/home/dev/hangout-automator` | Read/write |
 
