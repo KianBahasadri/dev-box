@@ -1,0 +1,3 @@
+# Only this root-owned launcher, with no arguments, may run without a password.
+# The launcher fixes the local instance/user and replaces its environment.
+kian ALL=(root) NOPASSWD: NOSETENV: /usr/local/sbin/dev-box-enter ""

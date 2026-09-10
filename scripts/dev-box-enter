@@ -1,0 +1,78 @@
+#!/usr/bin/python3 -I
+"""Enter one existing unprivileged container; never expose Incus administration."""
+
+import os
+import re
+import sys
+
+
+HOST_HOME = "/home/kian"
+CONTAINER_HOME = "/home/dev"
+INCUS = "/usr/bin/incus"
+CONTAINER_PATH = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+# This script runs INSIDE node-dev, after Incus has selected UID/GID 1000.
+# The working directory is positional data, never interpolated into shell code.
+CONTAINER_ENTRY = 'cd -- "$1" 2>/dev/null || cd /home/dev || exit; exec /usr/bin/bash -i'
+
+
+def container_directory(host_directory):
+    if host_directory == HOST_HOME:
+        return CONTAINER_HOME
+    if host_directory.startswith(HOST_HOME + "/"):
+        return CONTAINER_HOME + host_directory[len(HOST_HOME):]
+    return CONTAINER_HOME
+
+
+def invocation(host_directory, terminal):
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9+_.-]{0,63}", terminal):
+        terminal = "xterm-256color"
+    environment = {
+        "HOME": "/root",
+        "PATH": "/usr/bin:/bin",
+        "LANG": "C.UTF-8",
+        "TERM": terminal,
+        "INCUS_DIR": "/var/lib/incus",
+        "INCUS_CONF": "/etc/dev-box-launcher",
+        "INCUS_GLOBAL_CONF": "/etc/dev-box-launcher",
+    }
+    arguments = [
+        INCUS, "--force-local", "--project", "default", "exec", "node-dev",
+        "--user", "1000", "--group", "1000", "--cwd", CONTAINER_HOME,
+    ]
+    for variable, value in {
+        "HOME": CONTAINER_HOME,
+        "USER": "dev",
+        "LOGNAME": "dev",
+        "SHELL": "/usr/bin/bash",
+        "PATH": CONTAINER_PATH,
+        "TERM": terminal,
+    }.items():
+        arguments.extend(["--env", variable + "=" + value])
+    arguments.extend([
+        "--", "/usr/bin/bash", "--noprofile", "--norc", "-c",
+        CONTAINER_ENTRY, "dev-box-enter", container_directory(host_directory),
+    ])
+    return arguments, environment
+
+
+def main():
+    if len(sys.argv) != 1:
+        print("dev-box-enter accepts no arguments.", file=sys.stderr)
+        return 2
+    if os.geteuid() != 0:
+        print("Run: sudo /usr/local/sbin/dev-box-enter", file=sys.stderr)
+        return 1
+    try:
+        directory = os.getcwd()
+    except OSError:
+        directory = HOST_HOME
+    arguments, environment = invocation(directory, os.environ.get("TERM", ""))
+    # Do not leave the privileged client in a caller-controlled directory.
+    os.chdir("/")
+    os.umask(0o077)
+    os.execve(INCUS, arguments, environment)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

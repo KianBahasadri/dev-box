@@ -7,6 +7,7 @@ See `AGENTS.md` for agent/AI tooling notes (container access, prompt detection, 
 ## Files
 
 - `node-dev.tf` - Defines the `node-dev` Incus instance.
+- `scripts/dev-box-enter` - Restricted host launcher for entering the existing container; see [container access](docs/container-access.md) for installation.
 
 ## Requirements
 

@@ -23,12 +23,84 @@ incus exec node-dev -- su -l dev -c id
 
 ## Entering the container
 
+Use `dev` from a host Bash terminal. The host launcher preserves a directory
+under `/home/kian` when its corresponding `/home/dev` directory exists inside
+the container; otherwise it starts in `/home/dev`. It opens the same interactive,
+non-login Bash environment as the original shortcut, including the container's
+`.bashrc`, project environment, and Wayland setup. Paths outside `/home/kian`
+also start in `/home/dev`.
+
+`dev` uses passwordless sudo for **one fixed launcher**, not for Incus itself:
+
 ```bash
-incus exec node-dev -- su -l dev
+dev() {
+  if (( $# != 0 )); then
+    printf 'Usage: dev\n' >&2
+    return 2
+  fi
+  local dev_status
+  /usr/bin/sudo -- /usr/local/sbin/dev-box-enter
+  dev_status=$?
+  printf '\n'
+  return "$dev_status"
+}
 ```
 
-Drops into a login shell as `dev` with the usual environment (`~/.bashrc`,
-etc.).
+The launcher is maintained in `scripts/dev-box-enter` and installed on the
+**host** at `/usr/local/sbin/dev-box-enter`, owned by root and not writable by
+ordinary users. Its no-argument sudo rule lives at
+`/etc/sudoers.d/dev-box-enter`. Install or update both with the reviewed installer:
+
+```bash
+sudo /usr/bin/python3 -I /home/kian/dev-box/scripts/install-dev-launcher.py
+```
+
+The installer validates sudoers before and after installation and restores the
+previous files if installation fails. It does not change group memberships,
+container configuration, or services. After installing, replace the host's
+`dev()` function with the definition above and open a new terminal.
+
+The privileged launcher fixes the local Incus daemon, `default` project,
+`node-dev` instance, container UID/GID 1000, and shell. It replaces the host
+environment and uses an isolated root-owned configuration directory at
+`/etc/dev-box-launcher`. Only a validated terminal type and the actual current
+directory can vary; the directory is passed as data to a shell running inside
+the container as `dev`. Host shell initialization and user Incus aliases are
+never used by the privileged launcher.
+
+The existing instance must already be running. An administrator handles its
+configuration and start/stop operations separately. Do not grant passwordless
+access to arbitrary `incus` commands or make the installed launcher writable by
+the desktop user. This entry mechanism does not require `incus-admin` membership.
+It retains the existing container mounts and their access permissions.
+
+To check the installation after a new login:
+
+```bash
+sudo -n -l /usr/local/sbin/dev-box-enter
+dev
+# Inside the dev box:
+id       # uid=1000(dev), gid=1000(dev)
+pwd      # mapped project directory or /home/dev
+```
+
+The launcher rejects arguments; `sudo -n /usr/local/sbin/dev-box-enter anything`
+must fail. Security tests run without root or an Incus daemon:
+
+```bash
+python3 -I -m unittest discover -s tests -p test_dev_launcher.py -v
+```
+
+For deliberate administration before the launcher is installed, an
+administrator can enter using:
+
+```bash
+sudo incus --force-local --project default exec node-dev -- su -l dev
+```
+
+That command opens a login shell and requires ordinary administrative authority.
+Running the repository's Terraform providers/provisioners with `sudo` is not a
+substitute for designing the separate administration workflow.
 
 ## Recognizing pasted terminal output
 
