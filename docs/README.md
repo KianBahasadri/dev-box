@@ -4,6 +4,7 @@
 - [bind-mounts.md](bind-mounts.md) — Host-to-container disk mounts with UID/GID shifting, the UID-1000 requirement, and keeping absolute-path build artifacts (Python venvs) from colliding across the mount.
 - [wayland-proxy.md](wayland-proxy.md) — The proxy device forwarding the host Wayland socket, and why it isn't a runtime-dir mount.
 - [container-access.md](container-access.md) — The restricted host `dev` launcher, its installation and security boundary, the container user, and recognizing pasted terminal output.
+- [network-isolation.md](network-isolation.md) — Host-enforced guest network boundaries, preserved development connections, and how to review exceptions.
 - [terraform-config.md](terraform-config.md) — Terraform version/provider constraints, lock file, and provisioning commands.
 
 ## Notes
