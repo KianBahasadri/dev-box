@@ -14,6 +14,7 @@ container. `shift = "true"` enables Incus UID/GID shifting so the container's
 | `/home/kian/Downloads/dev` | `/home/dev/Downloads/dev` | Read/write |
 | `/home/kian/game` | `/home/dev/game` | Read/write |
 | `/home/kian/hangout-automator` | `/home/dev/hangout-automator` | Read/write |
+| `/home/kian/warframe-toolkit` | `/home/dev/warframe-toolkit` | Read/write |
 
 Host paths are machine-specific — edit them (and this table) to match your own
 home directory. Add more `device` blocks in `node-dev.tf` to mount additional

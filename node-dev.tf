@@ -85,6 +85,38 @@ resource "incus_instance" "node_dev" {
     }
   }
 
+  device {
+    name = "warframe-toolkit"
+    type = "disk"
+
+    properties = {
+      source = "/home/kian/warframe-toolkit"
+      path   = "/home/dev/warframe-toolkit"
+      shift  = "true"
+    }
+  }
+
+  # Keep the same browser origins when Warframe Toolkit runs in the dev box.
+  device {
+    name = "port-5173"
+    type = "proxy"
+
+    properties = {
+      listen  = "tcp:127.0.0.1:5173"
+      connect = "tcp:127.0.0.1:5173"
+    }
+  }
+
+  device {
+    name = "port-4173"
+    type = "proxy"
+
+    properties = {
+      listen  = "tcp:127.0.0.1:4173"
+      connect = "tcp:127.0.0.1:4173"
+    }
+  }
+
   # Host localhost:8000/8001 → container :8000/:8001 (e.g. dev servers, game backends).
   device {
     name = "port-8000"

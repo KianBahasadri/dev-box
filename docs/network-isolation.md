@@ -13,7 +13,7 @@ blocked. Unsolicited routed connections into those guests are also blocked.
 Preserved connections include gateway DNS, DHCP, IPv6 discovery, public Internet
 access and return traffic, host-initiated guest connections, and guest loopback.
 Existing established connections are retained when the policy is loaded. The
-host-local 8000/8001 Incus proxies and Unix Wayland proxy continue to work; they
+host-local Incus TCP proxies and Unix Wayland proxy continue to work; they
 do not need a general guest-to-host IP exception.
 
 Live validation on September 10 checked DNS and npm HTTPS as UID1000,
