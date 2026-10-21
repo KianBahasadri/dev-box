@@ -9,9 +9,9 @@ Defined in `node-dev.tf` as an `incus_instance` resource.
 | Profile   | `default` |
 | State     | Kept running (`running = true`) |
 
-The resource declares two devices — a disk mount for project directories and a
-Wayland socket proxy. Those are documented separately in
-[bind-mounts.md](bind-mounts.md) and [wayland-proxy.md](wayland-proxy.md).
+The resource declares project disk mounts, localhost port proxies, a Wayland
+socket proxy, and an NVIDIA GPU device. See [bind-mounts.md](bind-mounts.md),
+[wayland-proxy.md](wayland-proxy.md), and [gpu.md](gpu.md) for their setup.
 
 ## The image ships without a timezone
 

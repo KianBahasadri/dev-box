@@ -17,6 +17,24 @@ resource "incus_instance" "node_dev" {
   profiles = ["default"]
   running  = true
 
+  config = {
+    "nvidia.runtime"             = "true"
+    "nvidia.driver.capabilities" = "compute,utility,video"
+  }
+
+  device {
+    name = "nvidia-gpu"
+    type = "gpu"
+
+    properties = {
+      gputype = "physical"
+      pci     = "0000:01:00.0"
+      uid     = "1000"
+      gid     = "1000"
+      mode    = "0660"
+    }
+  }
+
   device {
     name = "condition-assesment-report-generator"
     type = "disk"
@@ -81,6 +99,17 @@ resource "incus_instance" "node_dev" {
     properties = {
       source = "/home/kian/hangout-automator"
       path   = "/home/dev/hangout-automator"
+      shift  = "true"
+    }
+  }
+
+  device {
+    name = "movie_faceswap"
+    type = "disk"
+
+    properties = {
+      source = "/home/kian/movie_faceswap"
+      path   = "/home/dev/movie_faceswap"
       shift  = "true"
     }
   }

@@ -3,6 +3,7 @@
 - [instance.md](instance.md) — The `node-dev` Incus container resource: name, image, profile, running state, and the missing timezone the image ships with.
 - [bind-mounts.md](bind-mounts.md) — Host-to-container disk mounts with UID/GID shifting, the UID-1000 requirement, and keeping absolute-path build artifacts (Python venvs) from colliding across the mount.
 - [wayland-proxy.md](wayland-proxy.md) — The proxy device forwarding the host Wayland socket, and why it isn't a runtime-dir mount.
+- [gpu.md](gpu.md) — NVIDIA GPU access, host prerequisites, and activating the driver runtime.
 - [container-access.md](container-access.md) — The restricted host `dev` launcher, its installation and security boundary, the container user, and recognizing pasted terminal output.
 - [warframe-toolkit.md](warframe-toolkit.md) — Warframe Toolkit development in the shared directory, localhost Vite ports, and browser tests.
 - [network-isolation.md](network-isolation.md) — Host-enforced guest network boundaries, preserved development connections, and how to review exceptions.
